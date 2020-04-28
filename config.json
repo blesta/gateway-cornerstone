@@ -1,0 +1,12 @@
+{
+	"version": "1.0.0",
+	"name": "Cornerstone.name",
+	"description": "Cornerstone.description",
+	"authors": [
+		{
+			"name": "Phillips Data, Inc.",
+			"url": "http://www.blesta.com"
+		}
+	],
+	"currencies": ["USD"]
+}
