@@ -41,9 +41,7 @@ class CornerstoneApi
     {
         $url = self::LIVE_URL;
 
-        $args = array_merge([
-            'security_key' => $this->security_key
-        ], $args);
+        $args['security_key'] = $this->security_key;
 
         $this->last_request = [
             'url' => $url,
@@ -72,7 +70,8 @@ class CornerstoneApi
     /**
      * Returns the details of the last request made
      *
-     * @return array An array containg:
+     * @return array An array containing:
+     *
      *  - url The URL of the last request
      *  - args The parameters passed to the URL
      */

@@ -3,7 +3,7 @@
 		<li>
 			<?php
             $this->Form->label($this->_('Cornerstone.security_key', true), 'security_key');
-            $this->Form->fieldText('security_key', $this->Html->ifSet($meta['security_key']), ['id'=>'security_key']);
+            $this->Form->fieldText('security_key', $this->Html->ifSet($meta['security_key']), ['id' => 'security_key']);
             ?>
 		</li>
 	</ul>
