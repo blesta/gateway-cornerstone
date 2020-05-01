@@ -227,13 +227,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      */
     public function captureCc($reference_id, $transaction_id, $amount, array $invoice_amounts = null)
     {
-        // Capture this payment transaction
-        $transaction = $this->processTransaction($this->getCcParams('capture', $transaction_id, $amount));
-
-        // Keep the same reference ID as used with the authorize
-        $transaction['reference_id'] = $reference_id;
-
-        return $transaction;
+        $this->Input->setErrors($this->getCommonError('unsupported'));
     }
 
     /**

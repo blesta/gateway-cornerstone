@@ -48,7 +48,7 @@ class CornerstoneApiResponse
      */
     public function status()
     {
-        if ($this->response && isset($this->response->response)) {
+        if (isset($this->response->response)) {
             $status_map = [1 => 'approved', 2 => 'declined', 3 => 'error'];
 
             return (
