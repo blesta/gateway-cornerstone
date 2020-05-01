@@ -48,18 +48,14 @@ class CornerstoneApiResponse
      */
     public function status()
     {
-        if ($this->response && isset($this->response->response)) {
-            switch ($this->response->response) {
-                case 1:
-                    return 'approved';
-                    break;
-                case 2:
-                    return 'declined';
-                    break;
-                case 3:
-                    return 'error';
-                    break;
-            }
+        if (isset($this->response->response)) {
+            $status_map = [1 => 'approved', 2 => 'declined', 3 => 'error'];
+
+            return (
+                isset($this->response->response) && array_key_exists($this->response->response, $status_map)
+                ? $status_map[$this->response->response]
+                : null
+            );
         }
         return null;
     }
@@ -71,7 +67,7 @@ class CornerstoneApiResponse
      */
     public function errors()
     {
-        if ($this->response && $this->response->response == ERROR) {
+        if (isset($this->response->response) && $this->response->response == 3) {
             return (object) [
                 'response' => $this->response->response,
                 'responsetext' => $this->response->responsetext,

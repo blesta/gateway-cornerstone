@@ -17,10 +17,6 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @var array An array of meta data for this gateway
      */
     private $meta;
-    /**
-     * @var string The base URL of API requests
-     */
-    private $base_url = 'https://cps.transactiongateway.com/api/transact.php';
 
     /**
      * Construct a new merchant gateway
@@ -127,6 +123,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * Charge a credit card
      *
      * @param array $card_info An array of credit card info including:
+     *
      *  - first_name The first name on the card
      *  - last_name The last name on the card
      *  - card_number The card number
@@ -147,9 +144,11 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      *  - zip The zip/postal code of the card holder
      * @param float $amount The amount to charge this card
      * @param array $invoice_amounts An array of invoices, each containing:
+     *
      *  - id The ID of the invoice being processed
      *  - amount The amount being processed for this invoice (which is included in $amount)
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, error, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -171,6 +170,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * Authorize a credit card
      *
      * @param array $card_info An array of credit card info including:
+     *
      *  - first_name The first name on the card
      *  - last_name The last name on the card
      *  - card_number The card number
@@ -191,9 +191,11 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      *  - zip The zip/postal code of the card holder
      * @param float $amount The amount to charge this card
      * @param array $invoice_amounts An array of invoices, each containing:
+     *
      *  - id The ID of the invoice being processed
      *  - amount The amount being processed for this invoice (which is included in $amount)
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, error, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -202,13 +204,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      */
     public function authorizeCc(array $card_info, $amount, array $invoice_amounts = null)
     {
-        // Authorize this transaction
-        $transaction = $this->processTransaction($this->getCcParams('auth', null, $amount, $card_info));
-
-        // Save the last 4 of the CC number (for potential use with refunds)
-        $transaction['reference_id'] = substr($this->ifSet($card_info['card_number']), -4);
-
-        return $transaction;
+        $this->Input->setErrors($this->getCommonError('unsupported'));
     }
 
     /**
@@ -218,9 +214,11 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param string $transaction_id The transaction ID for the previously authorized transaction
      * @param float $amount The amount to capture on this card
      * @param array $invoice_amounts An array of invoices, each containing:
+     *
      *  - id The ID of the invoice being processed
      *  - amount The amount being processed for this invoice (which is included in $amount)
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, error, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -229,13 +227,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      */
     public function captureCc($reference_id, $transaction_id, $amount, array $invoice_amounts = null)
     {
-        // Capture this payment transaction
-        $transaction = $this->processTransaction($this->getCcParams('capture', $transaction_id, $amount));
-
-        // Keep the same reference ID as used with the authorize
-        $transaction['reference_id'] = $reference_id;
-
-        return $transaction;
+        $this->Input->setErrors($this->getCommonError('unsupported'));
     }
 
     /**
@@ -244,6 +236,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param string $reference_id The reference ID for the previously authorized transaction
      * @param string $transaction_id The transaction ID for the previously authorized transaction
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, error, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -270,6 +263,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param string $transaction_id The transaction ID for the previously authorized transaction
      * @param float $amount The amount to refund this card
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, error, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -297,6 +291,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param int $transaction_id The ID of a previous transaction if available
      * @param float $amount The amount to charge this card
      * @param array $card_info An array of credit card info including:
+     *
      *  - first_name The first name on the card
      *  - last_name The last name on the card
      *  - card_number The card number
@@ -328,7 +323,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
                     'ccnumber' => $this->ifSet($card_info['card_number']),
                     'ccexp' => substr($this->ifSet($card_info['card_exp']), 4, 2)
                         . substr($this->ifSet($card_info['card_exp']), 2, 2),
-                    'amount' => number_format($amount,2,'.',''),
+                    'amount' => number_format($amount, 2, '.', ''),
                     'cvv' => $this->ifSet($card_info['card_security_code']),
                     'firstname' => $this->ifSet($card_info['first_name']),
                     'lastname' => $this->ifSet($card_info['last_name']),
@@ -347,7 +342,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
                 ];
 
                 if ($amount > 0) {
-                    $params['amount'] = number_format($amount,2,'.','');
+                    $params['amount'] = number_format($amount, 2, '.', '');
                 }
             case 'void':
                 $params = [
@@ -367,6 +362,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param int $transaction_id The ID of a previous transaction if available
      * @param float $amount The amount to charge this card
      * @param array $account_info An array of bank account info including:
+     *
      *  - first_name The first name on the account
      *  - last_name The last name on the account
      *  - account_number The bank account number
@@ -401,7 +397,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
                     'checkaba' => $this->ifSet($account_info['routing_number']),
                     'checkaccount' => $this->ifSet($account_info['account_number']),
                     'account_type' => $this->ifSet($account_info['type']),
-                    'amount' => number_format($amount,2,'.',''),
+                    'amount' => number_format($amount, 2, '.', ''),
                     'payment' => 'check',
                     'firstname' => $this->ifSet($account_info['first_name']),
                     'lastname' => $this->ifSet($account_info['last_name']),
@@ -420,7 +416,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
                 ];
 
                 if ($amount > 0) {
-                    $params['amount'] = number_format($amount,2,'.','');
+                    $params['amount'] = number_format($amount, 2, '.', '');
                 }
             case 'void':
                 $params = [
@@ -437,6 +433,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * Process an ACH transaction
      *
      * @param array $account_info An array of bank account info including:
+     *
      *  - first_name The first name on the account
      *  - last_name The last name on the account
      *  - account_number The bank account number
@@ -456,9 +453,11 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      *  - zip The zip/postal code of the account holder
      * @param float $amount The amount to debit this account
      * @param array $invoice_amounts An array of invoices, each containing:
+     *
      *  - id The ID of the invoice being processed
      *  - amount The amount being processed for this invoice (which is included in $amount)
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, reconciled, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -477,6 +476,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param string $reference_id The reference ID for the previously authorized transaction
      * @param string $transaction_id The transaction ID for the previously authorized transaction
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, reconciled, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -503,6 +503,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      * @param string $transaction_id The transaction ID for the previously authorized transaction
      * @param float $amount The amount to refund this account
      * @return array An array of transaction data including:
+     *
      *  - status The status of the transaction (approved, declined, void, pending, reconciled, refunded, returned)
      *  - reference_id The reference ID for gateway-only use with this transaction (optional)
      *  - transaction_id The ID returned by the remote gateway to identify this transaction
@@ -527,6 +528,7 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      *
      * @param array $fields An array of key=>value pairs to process
      * @return array A list of response key=>value pairs including:
+     *
      *  - status (approved, declined, or error)
      *  - reference_id
      *  - transaction_id
@@ -540,6 +542,12 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
 
         // Submit the request
         $request = $api->submit($fields);
+
+        if (!$request) {
+            $this->Input->setErrors($this->getCommonError('general'));
+
+            return;
+        }
 
         // Parse the response
         $response = $request->response();
@@ -578,6 +586,9 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
      */
     private function logRequest($params, $response)
     {
+        // Load library methods
+        Loader::load(dirname(__FILE__) . DS . 'apis' . DS . 'cornerstone_api.php');
+
         // Mask any specific fields
         $mask_fields = [
             'security_key',
@@ -595,9 +606,9 @@ class Cornerstone extends MerchantGateway implements MerchantCc, MerchantAch
         }
 
         // Log data sent to the gateway
-        $this->log($this->base_url, serialize($this->maskData($params, $mask_fields)), 'input', true);
+        $this->log(CornerstoneApi::LIVE_URL, serialize($this->maskData($params, $mask_fields)), 'input', true);
 
         // Log response from the gateway
-        $this->log($this->base_url, serialize($this->maskData($response, $mask_fields)), 'output', $success);
+        $this->log(CornerstoneApi::LIVE_URL, serialize($this->maskData($response, $mask_fields)), 'output', $success);
     }
 }
