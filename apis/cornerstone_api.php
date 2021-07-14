@@ -1,4 +1,6 @@
 <?php
+use Blesta\Core\Util\Common\Traits\Container;
+
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cornerstone_api_response.php';
 
 /**
@@ -10,6 +12,9 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cornerstone_api_response
  */
 class CornerstoneApi
 {
+    // Load traits
+    use Container;
+
     const LIVE_URL = 'https://cps.transactiongateway.com/api/transact.php';
 
     /**
@@ -29,6 +34,10 @@ class CornerstoneApi
     public function __construct($security_key)
     {
         $this->security_key = $security_key;
+
+        // Initialize logger
+        $logger = $this->getFromContainer('logger');
+        $this->logger = $logger;
     }
 
     /**
@@ -54,11 +63,20 @@ class CornerstoneApi
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($args));
         curl_setopt($ch, CURLOPT_POST, 1);
 
+        if (Configure::get('Blesta.curl_verify_ssl')) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
         if (!($data = curl_exec($ch))) {
+            $this->logger->error(curl_error($ch));
+
             return false;
         }
 
